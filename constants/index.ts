@@ -81,6 +81,6 @@ export const navItems = [
     },
   ];
   
-  export const avatarPlaceholder = "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"; 
+  export const avatarPlaceholder = "https://img.freepik.com/premium-photo/3d-illustration-cartoon-business-man-character-avatar-profile_1183071-397.jpg"; 
 
   export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
