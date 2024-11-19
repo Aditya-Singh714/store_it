@@ -31,7 +31,7 @@ import {
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "@/components/ActionsModalContent";
 
-export const ActionDropdown = ({ file }: { file: Models.Document }) => {
+  const ActionsDropDown = ({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
@@ -204,3 +204,5 @@ export const ActionDropdown = ({ file }: { file: Models.Document }) => {
     </Dialog>
   );
 };
+
+export default ActionsDropDown;

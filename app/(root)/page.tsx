@@ -8,7 +8,8 @@ import { Thumbnail } from "@/components/Thumbnail";
 import { Separator } from "@/components/ui/separator";
 import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.actions";
 import { convertFileSize, getUsageSummary } from "@/lib/utils";
-import{ ActionDropdown} from "@/components/ActionDropdown";
+import ActionsDropDown from "@/components/ActionsDropDown";
+
 
 
 
@@ -87,7 +88,7 @@ const Dashboard = async () => {
                       className="caption"
                     />
                   </div>
-                  <ActionDropdown file={file} />
+                  <ActionsDropDown file={file} />
                 </div>
               </Link>
             ))}
