@@ -8,7 +8,8 @@ import { Thumbnail } from "@/components/Thumbnail";
 import { Separator } from "@/components/ui/separator";
 import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.actions";
 import { convertFileSize, getUsageSummary } from "@/lib/utils";
-import ActionDropdown from "@/components/ActionDropdown";
+import ActionDropdown from "../../components/ActionDropdown";
+
 
 
 const Dashboard = async () => {
