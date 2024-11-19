@@ -14,15 +14,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { createAccount, signInUser } from "@/lib/actions/user.actions";
-import OTPModal from "./OTPModal";
-
-// const formSchema = z.object({
-//   username: z.string().min(2).max(50),
-// });
+import OtpModal from "@/components/OTPModal";
 
 type FormType = "sign-in" | "sign-up";
 
@@ -34,7 +30,7 @@ const authFormSchema = (formType: FormType) => {
         ? z.string().min(2).max(50)
         : z.string().optional(),
   });
-}
+};
 
 const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,18 +49,19 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setErrorMessage("");
-    
+
     try {
       const user =
-        type === 'sign-up' ? await createAccount({
-        fullName: values.fullName || "",
-        email: values.email, 
-      })
-      : await signInUser({ email: values.email });
+        type === "sign-up"
+          ? await createAccount({
+              fullName: values.fullName || "",
+              email: values.email,
+            })
+          : await signInUser({ email: values.email });
 
       setAccountId(user.accountId);
     } catch {
-      setErrorMessage("Failed to create account. Please try again");
+      setErrorMessage("Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +129,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
             {isLoading && (
               <Image
-                src="/icons/loader.svg"
+                src="/assets/icons/loader.svg"
                 alt="loader"
                 width={24}
                 height={24}
@@ -160,10 +157,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
         </form>
       </Form>
 
-      {/* OPT Verification */}
-
       {accountId && (
-        <OTPModal email={form.getValues("email")} accountId={accountId} />)}
+        <OtpModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 };

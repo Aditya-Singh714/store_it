@@ -1,139 +1,143 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
-import { createAdminClient, createSessionClient } from "../appwrite";
-import { appwriteConfig } from "../appwrite/config";
-import { parseStringify } from "../utils";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/appwrite/config";
+import { Query, ID } from "node-appwrite";
+import { parseStringify } from "@/lib/utils";
 import { cookies } from "next/headers";
-import { avatarPlaceholder } from "@/constants";
+import { avatarPlaceholderUrl } from "@/constants";
 import { redirect } from "next/navigation";
 
 const getUserByEmail = async (email: string) => {
-    const { databases } = await createAdminClient();
+  const { databases } = await createAdminClient();
 
-    const result = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.usersCollectionId,
-        [Query.equal("email", [email])],
-    );
+  const result = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    [Query.equal("email", [email])],
+  );
 
-    return result.total > 0 ? result.documents[0] : null;
+  return result.total > 0 ? result.documents[0] : null;
 };
 
 const handleError = (error: unknown, message: string) => {
-    console.log(error, message);
-    throw error;
+  console.log(error, message);
+  throw error;
 };
 
 export const sendEmailOTP = async ({ email }: { email: string }) => {
-    const { account } = await createAdminClient();
+  const { account } = await createAdminClient();
 
-    try {
-        const session = await account.createEmailToken(ID.unique(), email);
+  try {
+    const session = await account.createEmailToken(ID.unique(), email);
 
-        return session.userId;
-    } catch (error) {
-        handleError(error, "Failed to send email OTP");
-    }
+    return session.userId;
+  } catch (error) {
+    handleError(error, "Failed to send email OTP");
+  }
 };
 
 export const createAccount = async ({
-    fullName,
-    email,
+  fullName,
+  email,
 }: {
-    fullName: string;
-    email: string;
+  fullName: string;
+  email: string;
 }) => {
-    const existingUser = await getUserByEmail(email);
+  const existingUser = await getUserByEmail(email);
 
-    const accountId = await sendEmailOTP({ email });
-    if (!accountId) throw new Error("Failed to send an OTP");
+  const accountId = await sendEmailOTP({ email });
+  if (!accountId) throw new Error("Failed to send an OTP");
 
-    if (!existingUser) {
-        const { databases } = await createAdminClient();
+  if (!existingUser) {
+    const { databases } = await createAdminClient();
 
-        await databases.createDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.usersCollectionId,
-            ID.unique(),
-            {
-                fullName,
-                email,
-                avatar: avatarPlaceholder,
-                accountId,
-            },
-        );
-    }
+    await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      ID.unique(),
+      {
+        fullName,
+        email,
+        avatar: avatarPlaceholderUrl,
+        accountId,
+      },
+    );
+  }
 
-    return parseStringify({ accountId });
+  return parseStringify({ accountId });
 };
 
 export const verifySecret = async ({
-    accountId,
-    password,
+  accountId,
+  password,
 }: {
-    accountId: string;
-    password: string;
+  accountId: string;
+  password: string;
 }) => {
-    try {
-        const { account } = await createAdminClient();
+  try {
+    const { account } = await createAdminClient();
 
-        const session = await account.createSession(accountId, password);
+    const session = await account.createSession(accountId, password);
 
-        (await cookies()).set("appwrite-session", session.secret, {
-            path: "/",
-            httpOnly: true,
-            sameSite: "strict",
-            secure: true,
-        });
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
 
-        return parseStringify({ sessionId: session.$id });
-    } catch (error) {
-        handleError(error, "Failed to verify OTP");
-    }
+    return parseStringify({ sessionId: session.$id });
+  } catch (error) {
+    handleError(error, "Failed to verify OTP");
+  }
 };
 
 export const getCurrentUser = async () => {
+  try {
     const { databases, account } = await createSessionClient();
 
     const result = await account.get();
 
     const user = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.usersCollectionId,
-        [Query.equal("accountId", result.$id)],
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("accountId", result.$id)],
     );
 
-    if(user.total <= 0) return null;
+    if (user.total <= 0) return null;
 
     return parseStringify(user.documents[0]);
-}
-
-export const signOutUser = async () => {
-    const { account } = await createSessionClient();
-
-    try {
-       await account.deleteSession('current');
-       (await cookies()).delete("appwrite-seesion");   
-    } catch (error) {
-        handleError(error, "Failed to sign out user");
-    } finally {
-        redirect("/sign-in");
-    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-export const signInUser = async ({ email }: { email: string}) => {
-    try {
-        const existingUser = await getUserByEmail(email);
+export const signOutUser = async () => {
+  const { account } = await createSessionClient();
 
-        // User exists, send OPT
-        if(existingUser) {
-            await sendEmailOTP({ email });
-            return parseStringify({ accountId: existingUser.accountId});
-        }  
+  try {
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
+  } catch (error) {
+    handleError(error, "Failed to sign out user");
+  } finally {
+    redirect("/sign-in");
+  }
+};
 
-        return parseStringify({ accountId: null, error: "User not found" });
-    } catch (error) {
-        handleError(error, "Failed to sign in user");
+export const signInUser = async ({ email }: { email: string }) => {
+  try {
+    const existingUser = await getUserByEmail(email);
+
+    // User exists, send OTP
+    if (existingUser) {
+      await sendEmailOTP({ email });
+      return parseStringify({ accountId: existingUser.accountId });
     }
-}
+
+    return parseStringify({ accountId: null, error: "User not found" });
+  } catch (error) {
+    handleError(error, "Failed to sign in user");
+  }
+};

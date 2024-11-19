@@ -18,10 +18,10 @@ import {
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { sendEmailOTP, verifySecret } from "@/lib/actions/user.actions";
+import { verifySecret, sendEmailOTP } from "@/lib/actions/user.actions";
 import { useRouter } from "next/navigation";
 
-const OTPModal = ({
+const OtpModal = ({
   accountId,
   email,
 }: {
@@ -63,7 +63,7 @@ const OTPModal = ({
           <AlertDialogTitle className="h2 text-center">
             Enter Your OTP
             <Image
-              src="/icons/close-dark.svg"
+              src="/assets/icons/close-dark.svg"
               alt="close"
               width={20}
               height={20}
@@ -98,7 +98,7 @@ const OTPModal = ({
               Submit
               {isLoading && (
                 <Image
-                  src="/icons/loader.svg"
+                  src="/assets/icons/loader.svg"
                   alt="loader"
                   width={24}
                   height={24}
@@ -125,4 +125,4 @@ const OTPModal = ({
   );
 };
 
-export default OTPModal;
+export default OtpModal;

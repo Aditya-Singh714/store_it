@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -39,7 +38,7 @@ const MobileNavigation = ({
   return (
     <header className="mobile-header">
       <Image
-        src="/icons/logo-full-brand.svg"
+        src="/assets/icons/logo-full-brand.svg"
         alt="logo"
         width={120}
         height={52}
@@ -49,7 +48,7 @@ const MobileNavigation = ({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger>
           <Image
-            src="/icons/menu.svg"
+            src="/assets/icons/menu.svg"
             alt="Search"
             width={30}
             height={30}
@@ -110,7 +109,7 @@ const MobileNavigation = ({
               onClick={async () => await signOutUser()}
             >
               <Image
-                src="/icons/logout.svg"
+                src="/assets/icons/logout.svg"
                 alt="logo"
                 width={24}
                 height={24}

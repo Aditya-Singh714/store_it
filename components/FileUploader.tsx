@@ -57,7 +57,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
 
       await Promise.all(uploadPromises);
     },
-    [ownerId, accountId, path, toast],
+    [ownerId, accountId, path],
   );
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
@@ -75,7 +75,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
       <input {...getInputProps()} />
       <Button type="button" className={cn("uploader-button", className)}>
         <Image
-          src="/icons/upload.svg"
+          src="/assets/icons/upload.svg"
           alt="upload"
           width={24}
           height={24}
@@ -104,7 +104,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
                   <div className="preview-item-name">
                     {file.name}
                     <Image
-                      src="/icons/file-loader.gif"
+                      src="/assets/icons/file-loader.gif"
                       width={80}
                       height={26}
                       alt="Loader"
@@ -113,7 +113,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
                 </div>
 
                 <Image
-                  src="/icons/remove.svg"
+                  src="/assets/icons/remove.svg"
                   width={24}
                   height={24}
                   alt="Remove"

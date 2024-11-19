@@ -1,20 +1,12 @@
 "use server";
 
-import {
-  DeleteFileProps,
-  FileType,
-  GetFilesProps,
-  RenameFileProps,
-  UpdateFileUsersProps,
-  UploadFileProps,
-} from "@/types";
-import { createAdminClient, createSessionClient } from "../appwrite";
-import { appwriteConfig } from "../appwrite/config";
-import { revalidatePath } from "next/cache";
-import { constructFileUrl, getFileType, parseStringify } from "../utils";
-import { ID, Models, Query } from "node-appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { InputFile } from "node-appwrite/file";
-import { getCurrentUser } from "./user.actions";
+import { appwriteConfig } from "@/lib/appwrite/config";
+import { ID, Models, Query } from "node-appwrite";
+import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/actions/user.actions";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
@@ -35,7 +27,7 @@ export const uploadFile = async ({
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
       ID.unique(),
-      inputFile
+      inputFile,
     );
 
     const fileDocument = {
@@ -55,7 +47,7 @@ export const uploadFile = async ({
         appwriteConfig.databaseId,
         appwriteConfig.filesCollectionId,
         ID.unique(),
-        fileDocument
+        fileDocument,
       )
       .catch(async (error: unknown) => {
         await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
@@ -74,7 +66,7 @@ const createQueries = (
   types: string[],
   searchText: string,
   sort: string,
-  limit?: number
+  limit?: number,
 ) => {
   const queries = [
     Query.or([
@@ -84,16 +76,14 @@ const createQueries = (
   ];
 
   if (types.length > 0) queries.push(Query.equal("type", types));
-
   if (searchText) queries.push(Query.contains("name", searchText));
-
   if (limit) queries.push(Query.limit(limit));
 
   if (sort) {
     const [sortBy, orderBy] = sort.split("-");
 
     queries.push(
-      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy)
+      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy),
     );
   }
 
@@ -118,9 +108,10 @@ export const getFiles = async ({
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      queries
+      queries,
     );
 
+    console.log({ files });
     return parseStringify(files);
   } catch (error) {
     handleError(error, "Failed to get files");
@@ -143,7 +134,7 @@ export const renameFile = async ({
       fileId,
       {
         name: newName,
-      }
+      },
     );
 
     revalidatePath(path);
@@ -167,13 +158,13 @@ export const updateFileUsers = async ({
       fileId,
       {
         users: emails,
-      }
+      },
     );
 
     revalidatePath(path);
     return parseStringify(updatedFile);
   } catch (error) {
-    handleError(error, "Failed to share file");
+    handleError(error, "Failed to rename file");
   }
 };
 
@@ -188,7 +179,7 @@ export const deleteFile = async ({
     const deletedFile = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      fileId
+      fileId,
     );
 
     if (deletedFile) {
@@ -198,10 +189,11 @@ export const deleteFile = async ({
     revalidatePath(path);
     return parseStringify({ status: "success" });
   } catch (error) {
-    handleError(error, "Failed to delete file");
+    handleError(error, "Failed to rename file");
   }
 };
 
+// ============================== TOTAL FILE SPACE USED
 export async function getTotalSpaceUsed() {
   try {
     const { databases } = await createSessionClient();
@@ -211,7 +203,7 @@ export async function getTotalSpaceUsed() {
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      [Query.equal("owner", [currentUser.$id])]
+      [Query.equal("owner", [currentUser.$id])],
     );
 
     const totalSpace = {
